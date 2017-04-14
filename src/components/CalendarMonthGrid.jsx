@@ -15,6 +15,7 @@ import CalendarMonth from './CalendarMonth';
 import isTransitionEndSupported from '../utils/isTransitionEndSupported';
 import getTransformStyles from '../utils/getTransformStyles';
 import getCalendarMonthWidth from '../utils/getCalendarMonthWidth';
+import toISOMonthString from '../utils/toISOMonthString';
 
 import ScrollableOrientationShape from '../shapes/ScrollableOrientationShape';
 
@@ -205,13 +206,14 @@ export default class CalendarMonthGrid extends React.Component {
         {months.map((month, i) => {
           const isVisible =
             (i >= firstVisibleMonthIndex) && (i < firstVisibleMonthIndex + numberOfMonths);
+          const monthString = toISOMonthString(month);
           return (
             <CalendarMonth
-              key={month.format('YYYY-MM')}
+              key={monthString}
               month={month}
               isVisible={isVisible}
               enableOutsideDays={enableOutsideDays}
-              modifiers={modifiers}
+              modifiers={modifiers[monthString]}
               monthFormat={monthFormat}
               orientation={orientation}
               onDayMouseEnter={onDayMouseEnter}
