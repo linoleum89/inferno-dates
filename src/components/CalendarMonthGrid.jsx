@@ -192,7 +192,7 @@ export default class CalendarMonthGrid extends Component {
 
     const style = {
       ...getTransformStyles(transformValue),
-      width,
+      //width,
     };
 
     return (
