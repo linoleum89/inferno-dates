@@ -1,6 +1,6 @@
 {
   "name": "inferno-dates",
-  "version": "11.1.10",
+  "version": "11.1.11",
   "description": "A responsive and accessible date range picker component built with Inferno",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,8 @@
     "check-changelog": "expr $(git status --porcelain 2>/dev/null| grep \"^\\s*M.*CHANGELOG.md\" | wc -l) >/dev/null || (echo 'Please edit CHANGELOG.md' && exit 1)",
     "check-only-changelog-changed": "(expr $(git status --porcelain 2>/dev/null| grep -v \"CHANGELOG.md\" | wc -l) >/dev/null && echo 'Only CHANGELOG.md may have uncommitted changes' && exit 1) || exit 0",
     "demo": "./node_modules/.bin/webpack-dev-server --progress --colors --content-base demo --inline --config demo/webpack.config.js",
-    "build-examples": "NODE_ENV=production webpack --config ./demo/webpack.config.prod.js && cp -rf ./demo/build/ ./docs/ >/dev/null"
+    "build-examples": "NODE_ENV=production webpack --config ./demo/webpack.config.prod.js && cp -rf ./demo/build/ ./docs/ >/dev/null",
+    "push": "npm publish --registry http://10.0.0.105:4873/"
   },
   "repository": {
     "type": "git",
@@ -58,18 +59,18 @@
     "coveralls": "^2.12.0",
     "cross-env": "^4.0.0",
     "eslint": "^3.17.1",
-    "eslint-loader": "^1.6.1",
     "eslint-config-inferno-app": "^6.0.0",
+    "eslint-loader": "^1.6.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-inferno": "^7.6.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "git-directory-deploy": "^1.5.1",
     "imports-loader": "^0.7.1",
     "in-publish": "^2.0.0",
-    "inferno": "^5.4.1",
-    "inferno-component": "^5.4.1",
-    "inferno-create-class": "^5.4.1",
-    "inferno-create-element": "^5.4.1",
+    "inferno": "^6.2.1",
+    "inferno-component": "^6.2.1",
+    "inferno-create-class": "^6.2.1",
+    "inferno-create-element": "^6.2.1",
     "inferno-dev-utils": "^5.3.2",
     "json-loader": "^0.5.4",
     "karma": "^1.4.0",
