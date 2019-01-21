@@ -1,6 +1,6 @@
 {
   "name": "inferno-dates",
-  "version": "11.1.13",
+  "version": "11.1.14",
   "description": "A responsive and accessible date range picker component built with Inferno",
   "main": "index.js",
   "scripts": {
