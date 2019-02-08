@@ -22,251 +22,237 @@ import CloseButton from '../svg/close';
 
 import DateRangePickerShape from '../shapes/DateRangePickerShape';
 
-import {
-  START_DATE,
-  END_DATE,
-  HORIZONTAL_ORIENTATION,
-  VERTICAL_ORIENTATION,
-  ANCHOR_LEFT,
-  ANCHOR_RIGHT,
-  DAY_SIZE,
-} from '../../constants';
+import { START_DATE, END_DATE, HORIZONTAL_ORIENTATION, VERTICAL_ORIENTATION, ANCHOR_LEFT, ANCHOR_RIGHT, DAY_SIZE } from '../../constants';
 
 const propTypes = forbidExtraProps(DateRangePickerShape);
 
 const defaultProps = {
-  // required props for a functional interactive DateRangePicker
-  startDate: null,
-  endDate: null,
-  focusedInput: null,
+	// required props for a functional interactive DateRangePicker
+	startDate: null,
+	endDate: null,
+	focusedInput: null,
 
-  // input related props
-  startDateId: START_DATE,
-  startDatePlaceholderText: 'Start Date',
-  endDateId: END_DATE,
-  endDatePlaceholderText: 'End Date',
-  disabled: false,
-  required: false,
-  screenReaderInputMessage: '',
-  showClearDates: false,
-  showDefaultInputIcon: false,
-  customInputIcon: null,
-  customArrowIcon: null,
-  customCloseIcon: null,
+	// input related props
+	startDateId: START_DATE,
+	startDatePlaceholderText: 'Start Date',
+	endDateId: END_DATE,
+	endDatePlaceholderText: 'End Date',
+	disabled: false,
+	required: false,
+	screenReaderInputMessage: '',
+	showClearDates: false,
+	showDefaultInputIcon: false,
+	customInputIcon: null,
+	customArrowIcon: null,
+	customCloseIcon: null,
 
-  // calendar presentation and interaction related props
-  orientation: HORIZONTAL_ORIENTATION,
-  anchorDirection: ANCHOR_LEFT,
-  horizontalMargin: 0,
-  withPortal: false,
-  withFullScreenPortal: false,
-  initialVisibleMonth: null,
-  numberOfMonths: 2,
-  keepOpenOnDateSelect: false,
-  reopenPickerOnClearDates: false,
-  renderCalendarInfo: null,
-  daySize: DAY_SIZE,
+	// calendar presentation and interaction related props
+	orientation: HORIZONTAL_ORIENTATION,
+	anchorDirection: ANCHOR_LEFT,
+	horizontalMargin: 0,
+	withPortal: false,
+	withFullScreenPortal: false,
+	initialVisibleMonth: null,
+	numberOfMonths: 2,
+	keepOpenOnDateSelect: false,
+	reopenPickerOnClearDates: false,
+	renderCalendarInfo: null,
+	daySize: DAY_SIZE,
+	autoScroll: false,
 
-  // navigation related props
-  navPrev: null,
-  navNext: null,
+	// navigation related props
+	navPrev: null,
+	navNext: null,
 
-  onPrevMonthClick() {},
-  onNextMonthClick() {},
+	onPrevMonthClick() {},
+	onNextMonthClick() {},
 
-  onClose() {},
+	onClose() {},
 
-  // day presentation and interaction related props
-  renderDay: null,
-  minimumNights: 1,
-  enableOutsideDays: false,
-  isDayBlocked: () => false,
-  isOutsideRange: day => !isInclusivelyAfterDay(day, moment()),
-  isDayHighlighted: () => false,
+	// day presentation and interaction related props
+	renderDay: null,
+	minimumNights: 1,
+	enableOutsideDays: false,
+	isDayBlocked: () => false,
+	isOutsideRange: day => !isInclusivelyAfterDay(day, moment()),
+	isDayHighlighted: () => false,
 
-  // internationalization
-  displayFormat: () => moment.localeData().longDateFormat('L'),
-  monthFormat: 'MMMM YYYY',
-  phrases: DateRangePickerPhrases,
+	// internationalization
+	displayFormat: () => moment.localeData().longDateFormat('L'),
+	monthFormat: 'MMMM YYYY',
+	phrases: DateRangePickerPhrases
 };
 
 export default class DateRangePicker extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dayPickerContainerStyles: {},
-      isDateRangePickerInputFocused: false,
-      isDayPickerFocused: false,
-      showKeyboardShortcuts: false,
-    };
+	constructor(props) {
+		super(props);
+		this.state = {
+			dayPickerContainerStyles: {},
+			isDateRangePickerInputFocused: false,
+			isDayPickerFocused: false,
+			showKeyboardShortcuts: false
+		};
 
-    this.isTouchDevice = false;
+		this.isTouchDevice = false;
 
-    this.onOutsideClick = this.onOutsideClick.bind(this);
-    this.onDateRangePickerInputFocus = this.onDateRangePickerInputFocus.bind(this);
-    this.onDayPickerFocus = this.onDayPickerFocus.bind(this);
-    this.onDayPickerBlur = this.onDayPickerBlur.bind(this);
-    this.showKeyboardShortcutsPanel = this.showKeyboardShortcutsPanel.bind(this);
+		this.centerControl = this.centerControl.bind(this);
+		this.onOutsideClick = this.onOutsideClick.bind(this);
+		this.onDateRangePickerInputFocus = this.onDateRangePickerInputFocus.bind(this);
+		this.onDayPickerFocus = this.onDayPickerFocus.bind(this);
+		this.onDayPickerBlur = this.onDayPickerBlur.bind(this);
+		this.showKeyboardShortcutsPanel = this.showKeyboardShortcutsPanel.bind(this);
 
-    this.responsivizePickerPosition = this.responsivizePickerPosition.bind(this);
-  }
+		this.responsivizePickerPosition = this.responsivizePickerPosition.bind(this);
+	}
 
-  componentDidMount() {
-    this.resizeHandle = addEventListener(
-      window,
-      'resize',
-      this.responsivizePickerPosition,
-      { passive: true },
-    );
-    this.responsivizePickerPosition();
+	componentDidMount() {
+		this.resizeHandle = addEventListener(window, 'resize', this.responsivizePickerPosition, { passive: true });
+		this.responsivizePickerPosition();
 
-    if (this.props.focusedInput) {
-      this.setState({
-        isDateRangePickerInputFocused: true,
-      });
-    }
+		if (this.props.focusedInput) {
+			this.setState({
+				isDateRangePickerInputFocused: true
+			});
+		}
 
-    this.isTouchDevice = isTouchDevice();
-  }
+		this.isTouchDevice = isTouchDevice();
+	}
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
+	shouldComponentUpdate(nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
+	}
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.focusedInput && this.props.focusedInput && this.isOpened()) {
-      // The date picker just changed from being closed to being open.
-      this.responsivizePickerPosition();
-    }
-  }
+	componentDidUpdate(prevProps) {
+		if (!prevProps.focusedInput && this.props.focusedInput && this.isOpened()) {
+			// The date picker just changed from being closed to being open.
+			this.responsivizePickerPosition();
+		}
+	}
 
-  componentWillUnmount() {
-    if (this.resizeHandle) removeEventListener(this.resizeHandle);
-  }
+	componentWillUnmount() {
+		if (this.resizeHandle) removeEventListener(this.resizeHandle);
+	}
 
-  onOutsideClick() {
-    const { onFocusChange, onClose, startDate, endDate } = this.props;
-    if (!this.isOpened()) return;
+	centerControl() {
+		const { autoScroll } = this.props;
+		if (autoScroll) {
+			const el = document.getElementsByClassName('DateRangePicker__picker')[0];
+			el && el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}
 
-    this.setState({
-      isDateRangePickerInputFocused: false,
-      isDayPickerFocused: false,
-      showKeyboardShortcuts: false,
-    });
+	onOutsideClick() {
+		const { onFocusChange, onClose, startDate, endDate, autoScroll } = this.props;
+		if (!this.isOpened()) return;
 
-    onFocusChange(null);
-    onClose({ startDate, endDate });
-  }
+		this.setState({
+			isDateRangePickerInputFocused: false,
+			isDayPickerFocused: false,
+			showKeyboardShortcuts: false
+		});
 
-  onDateRangePickerInputFocus(focusedInput) {
-    const { onFocusChange, withPortal, withFullScreenPortal } = this.props;
+		onFocusChange(null);
+		onClose({ startDate, endDate });
+	}
 
-    if (focusedInput) {
-      const moveFocusToDayPicker = withPortal || withFullScreenPortal || this.isTouchDevice;
-      if (moveFocusToDayPicker) {
-        this.onDayPickerFocus();
-      } else {
-        this.onDayPickerBlur();
-      }
-    }
+	onDateRangePickerInputFocus(focusedInput) {
+		const { onFocusChange, withPortal, withFullScreenPortal } = this.props;
 
-    onFocusChange(focusedInput);
-  }
+		if (focusedInput) {
+			const moveFocusToDayPicker = withPortal || withFullScreenPortal || this.isTouchDevice;
+			if (moveFocusToDayPicker) {
+				this.onDayPickerFocus();
+			} else {
+				this.onDayPickerBlur();
+			}
+		}
 
-  onDayPickerFocus() {
-    const { focusedInput, onFocusChange } = this.props;
-    if (!focusedInput) onFocusChange(START_DATE);
+		onFocusChange(focusedInput);
+	}
 
-    this.setState({
-      isDateRangePickerInputFocused: false,
-      isDayPickerFocused: true,
-      showKeyboardShortcuts: false,
-    });
-  }
+	onDayPickerFocus() {
+		const { focusedInput, onFocusChange } = this.props;
+		if (!focusedInput) onFocusChange(START_DATE);
 
-  onDayPickerBlur() {
-    this.setState({
-      isDateRangePickerInputFocused: true,
-      isDayPickerFocused: false,
-      showKeyboardShortcuts: false,
-    });
-  }
+		this.setState({
+			isDateRangePickerInputFocused: false,
+			isDayPickerFocused: true,
+			showKeyboardShortcuts: false
+		});
+	}
 
-  getDayPickerContainerClasses() {
-    const {
-      orientation,
-      withPortal,
-      withFullScreenPortal,
-      anchorDirection,
-    } = this.props;
-    const dayPickerClassName = cx('DateRangePicker__picker', {
-      'DateRangePicker__picker--direction-left': anchorDirection === ANCHOR_LEFT,
-      'DateRangePicker__picker--direction-right': anchorDirection === ANCHOR_RIGHT,
-      'DateRangePicker__picker--horizontal': orientation === HORIZONTAL_ORIENTATION,
-      'DateRangePicker__picker--vertical': orientation === VERTICAL_ORIENTATION,
-      'DateRangePicker__picker--portal': withPortal || withFullScreenPortal,
-      'DateRangePicker__picker--full-screen-portal': withFullScreenPortal,
-    });
+	onDayPickerBlur() {
+		this.setState({
+			isDateRangePickerInputFocused: true,
+			isDayPickerFocused: false,
+			showKeyboardShortcuts: false
+		});
+	}
 
-    return dayPickerClassName;
-  }
+	getDayPickerContainerClasses() {
+		const { orientation, withPortal, withFullScreenPortal, anchorDirection } = this.props;
+		const dayPickerClassName = cx('DateRangePicker__picker', {
+			'DateRangePicker__picker--direction-left': anchorDirection === ANCHOR_LEFT,
+			'DateRangePicker__picker--direction-right': anchorDirection === ANCHOR_RIGHT,
+			'DateRangePicker__picker--horizontal': orientation === HORIZONTAL_ORIENTATION,
+			'DateRangePicker__picker--vertical': orientation === VERTICAL_ORIENTATION,
+			'DateRangePicker__picker--portal': withPortal || withFullScreenPortal,
+			'DateRangePicker__picker--full-screen-portal': withFullScreenPortal
+		});
 
-  getDayPickerDOMNode() {
-    return findDOMNode(this.dayPicker); // eslint-disable-line react/no-find-dom-node
-  }
+		return dayPickerClassName;
+	}
 
-  isOpened() {
-    const { focusedInput } = this.props;
-    return focusedInput === START_DATE || focusedInput === END_DATE;
-  }
+	getDayPickerDOMNode() {
+		return findDOMNode(this.dayPicker); // eslint-disable-line react/no-find-dom-node
+	}
 
-  responsivizePickerPosition() {
-    if (!this.isOpened()) {
-      return;
-    }
+	isOpened() {
+		const { focusedInput } = this.props;
+		return focusedInput === START_DATE || focusedInput === END_DATE;
+	}
 
-    const { anchorDirection, horizontalMargin, withPortal, withFullScreenPortal } = this.props;
-    const { dayPickerContainerStyles } = this.state;
+	responsivizePickerPosition() {
+		if (!this.isOpened()) {
+			return;
+		}
 
-    const isAnchoredLeft = anchorDirection === ANCHOR_LEFT;
-    
-    if (!withPortal && !withFullScreenPortal) {
-      // kurdin's fix wrap with setTimeout of this.dayPickerContainer
-      setTimeout(() => { 
-        const containerRect = this.dayPickerContainer.getBoundingClientRect();
-        const currentOffset = dayPickerContainerStyles[anchorDirection] || 0;
-        const containerEdge =
-          isAnchoredLeft ? containerRect[ANCHOR_RIGHT] : containerRect[ANCHOR_LEFT];
+		const { anchorDirection, horizontalMargin, withPortal, withFullScreenPortal } = this.props;
+		const { dayPickerContainerStyles } = this.state;
 
-        this.setState({
-          dayPickerContainerStyles: getResponsiveContainerStyles(
-            anchorDirection,
-            currentOffset,
-            containerEdge,
-            horizontalMargin,
-          ),
-        });
-      }, 0);
-    
-    }
-  }
+		const isAnchoredLeft = anchorDirection === ANCHOR_LEFT;
 
-  showKeyboardShortcutsPanel() {
-    this.setState({
-      isDateRangePickerInputFocused: false,
-      isDayPickerFocused: true,
-      showKeyboardShortcuts: true,
-    });
-  }
+		if (!withPortal && !withFullScreenPortal) {
+			// kurdin's fix wrap with setTimeout of this.dayPickerContainer
+			setTimeout(() => {
+				const containerRect = this.dayPickerContainer.getBoundingClientRect();
+				const currentOffset = dayPickerContainerStyles[anchorDirection] || 0;
+				const containerEdge = isAnchoredLeft ? containerRect[ANCHOR_RIGHT] : containerRect[ANCHOR_LEFT];
 
-  maybeRenderDayPickerWithPortal() {
-    const { withPortal, withFullScreenPortal } = this.props;
+				this.setState({
+					dayPickerContainerStyles: getResponsiveContainerStyles(anchorDirection, currentOffset, containerEdge, horizontalMargin)
+				});
+			}, 0);
+		}
+	}
 
-    if (!this.isOpened()) {
-      return null;
-    }
-    
-    {/*
+	showKeyboardShortcutsPanel() {
+		this.setState({
+			isDateRangePickerInputFocused: false,
+			isDayPickerFocused: true,
+			showKeyboardShortcuts: true
+		});
+	}
+
+	maybeRenderDayPickerWithPortal() {
+		const { withPortal, withFullScreenPortal } = this.props;
+
+		if (!this.isOpened()) {
+			return null;
+		}
+
+		{
+			/*
     if (withPortal || withFullScreenPortal) {
       return (
 
@@ -276,177 +262,171 @@ export default class DateRangePicker extends Component {
         
       );
     }
-    */}
-    
-    return this.renderDayPicker();
-  }
+    */
+		}
 
-  renderDayPicker() {
-    const {
-      isDayBlocked,
-      isDayHighlighted,
-      isOutsideRange,
-      numberOfMonths,
-      orientation,
-      monthFormat,
-      navPrev,
-      navNext,
-      onPrevMonthClick,
-      onNextMonthClick,
-      onDatesChange,
-      onFocusChange,
-      withPortal,
-      withFullScreenPortal,
-      daySize,
-      enableOutsideDays,
-      focusedInput,
-      startDate,
-      endDate,
-      minimumNights,
-      keepOpenOnDateSelect,
-      renderDay,
-      renderCalendarInfo,
-      initialVisibleMonth,
-      customCloseIcon,
-      onClose,
-      phrases,
-    } = this.props;
-    const { dayPickerContainerStyles, isDayPickerFocused, showKeyboardShortcuts } = this.state;
+		return this.renderDayPicker();
+	}
 
-    const onOutsideClick = (!withFullScreenPortal && withPortal)
-      ? this.onOutsideClick
-      : undefined;
-    const initialVisibleMonthThunk =
-      initialVisibleMonth || (() => (startDate || endDate || moment()));
+	renderDayPicker() {
+		const {
+			isDayBlocked,
+			isDayHighlighted,
+			isOutsideRange,
+			numberOfMonths,
+			orientation,
+			monthFormat,
+			navPrev,
+			navNext,
+			onPrevMonthClick,
+			onNextMonthClick,
+			onDatesChange,
+			onFocusChange,
+			withPortal,
+			withFullScreenPortal,
+			daySize,
+			enableOutsideDays,
+			focusedInput,
+			startDate,
+			endDate,
+			minimumNights,
+			keepOpenOnDateSelect,
+			renderDay,
+			renderCalendarInfo,
+			initialVisibleMonth,
+			customCloseIcon,
+			onClose,
+			phrases
+		} = this.props;
+		const { dayPickerContainerStyles, isDayPickerFocused, showKeyboardShortcuts } = this.state;
 
-    const closeIcon = customCloseIcon || (<CloseButton />);
-    return (
-      <div // eslint-disable-line jsx-a11y/no-static-element-interactions
-        ref={(ref) => { this.dayPickerContainer = ref; }}
-        className={this.getDayPickerContainerClasses()}
-        style={dayPickerContainerStyles}
-        onClick={onOutsideClick}
-      >
-        <DayPickerRangeController
-          ref={(ref) => { this.dayPicker = ref; }}
-          orientation={orientation}
-          enableOutsideDays={enableOutsideDays}
-          numberOfMonths={numberOfMonths}
-          onPrevMonthClick={onPrevMonthClick}
-          onNextMonthClick={onNextMonthClick}
-          onDatesChange={onDatesChange}
-          onFocusChange={onFocusChange}
-          onClose={onClose}
-          focusedInput={focusedInput}
-          startDate={startDate}
-          endDate={endDate}
-          monthFormat={monthFormat}
-          withPortal={withPortal || withFullScreenPortal}
-          daySize={daySize}
-          initialVisibleMonth={initialVisibleMonthThunk}
-          navPrev={navPrev}
-          navNext={navNext}
-          minimumNights={minimumNights}
-          isOutsideRange={isOutsideRange}
-          isDayHighlighted={isDayHighlighted}
-          isDayBlocked={isDayBlocked}
-          keepOpenOnDateSelect={keepOpenOnDateSelect}
-          renderDay={renderDay}
-          renderCalendarInfo={renderCalendarInfo}
-          isFocused={isDayPickerFocused}
-          showKeyboardShortcuts={showKeyboardShortcuts}
-          onBlur={this.onDayPickerBlur}
-          phrases={phrases}
-        />
+		const onOutsideClick = !withFullScreenPortal && withPortal ? this.onOutsideClick : undefined;
+		const initialVisibleMonthThunk = initialVisibleMonth || (() => startDate || endDate || moment());
 
-        {withFullScreenPortal && (
-          <button
-            className="DateRangePicker__close"
-            type="button"
-            onClick={this.onOutsideClick}
-            aria-label={phrases.closeDatePicker}
-          >
-            <div className="DateRangePicker__close">
-              {closeIcon}
-            </div>
-          </button>
-        )}
-      </div>
-    );
-  }
+		const closeIcon = customCloseIcon || <CloseButton />;
+		return (
+			<div // eslint-disable-line jsx-a11y/no-static-element-interactions
+				ref={ref => {
+					this.dayPickerContainer = ref;
+				}}
+				className={this.getDayPickerContainerClasses()}
+				style={dayPickerContainerStyles}
+				onClick={onOutsideClick}>
+				<DayPickerRangeController
+					ref={ref => {
+						this.dayPicker = ref;
+					}}
+					orientation={orientation}
+					enableOutsideDays={enableOutsideDays}
+					numberOfMonths={numberOfMonths}
+					onPrevMonthClick={onPrevMonthClick}
+					onNextMonthClick={onNextMonthClick}
+					onDatesChange={onDatesChange}
+					onFocusChange={onFocusChange}
+					onClose={onClose}
+					focusedInput={focusedInput}
+					startDate={startDate}
+					endDate={endDate}
+					monthFormat={monthFormat}
+					withPortal={withPortal || withFullScreenPortal}
+					daySize={daySize}
+					initialVisibleMonth={initialVisibleMonthThunk}
+					navPrev={navPrev}
+					navNext={navNext}
+					minimumNights={minimumNights}
+					isOutsideRange={isOutsideRange}
+					isDayHighlighted={isDayHighlighted}
+					isDayBlocked={isDayBlocked}
+					keepOpenOnDateSelect={keepOpenOnDateSelect}
+					renderDay={renderDay}
+					renderCalendarInfo={renderCalendarInfo}
+					isFocused={isDayPickerFocused}
+					showKeyboardShortcuts={showKeyboardShortcuts}
+					onBlur={this.onDayPickerBlur}
+					phrases={phrases}
+				/>
 
-  render() {
-    const {
-      startDate,
-      startDateId,
-      startDatePlaceholderText,
-      endDate,
-      endDateId,
-      endDatePlaceholderText,
-      focusedInput,
-      screenReaderInputMessage,
-      showClearDates,
-      showDefaultInputIcon,
-      customInputIcon,
-      customArrowIcon,
-      customCloseIcon,
-      disabled,
-      required,
-      phrases,
-      isOutsideRange,
-      withPortal,
-      withFullScreenPortal,
-      displayFormat,
-      reopenPickerOnClearDates,
-      keepOpenOnDateSelect,
-      onDatesChange,
-      onClose,
-    } = this.props;
+				{withFullScreenPortal && (
+					<button className="DateRangePicker__close" type="button" onClick={this.onOutsideClick} aria-label={phrases.closeDatePicker}>
+						<div className="DateRangePicker__close">{closeIcon}</div>
+					</button>
+				)}
+			</div>
+		);
+	}
 
-    const { isDateRangePickerInputFocused } = this.state;
+	render() {
+		const {
+			startDate,
+			startDateId,
+			startDatePlaceholderText,
+			endDate,
+			endDateId,
+			endDatePlaceholderText,
+			focusedInput,
+			screenReaderInputMessage,
+			showClearDates,
+			showDefaultInputIcon,
+			customInputIcon,
+			customArrowIcon,
+			customCloseIcon,
+			disabled,
+			required,
+			phrases,
+			isOutsideRange,
+			withPortal,
+			withFullScreenPortal,
+			displayFormat,
+			reopenPickerOnClearDates,
+			keepOpenOnDateSelect,
+			onDatesChange,
+			onClose
+		} = this.props;
 
-    const onOutsideClick = (!withPortal && !withFullScreenPortal) ? this.onOutsideClick : undefined;
+		const { isDateRangePickerInputFocused } = this.state;
 
-    return (
-      <div className="DateRangePicker">
-        <OutsideClickHandler onOutsideClick={onOutsideClick}>
-          <DateRangePickerInputController
-            startDate={startDate}
-            startDateId={startDateId}
-            startDatePlaceholderText={startDatePlaceholderText}
-            isStartDateFocused={focusedInput === START_DATE}
-            endDate={endDate}
-            endDateId={endDateId}
-            endDatePlaceholderText={endDatePlaceholderText}
-            isEndDateFocused={focusedInput === END_DATE}
-            displayFormat={displayFormat}
-            showClearDates={showClearDates}
-            showCaret={!withPortal && !withFullScreenPortal}
-            showDefaultInputIcon={showDefaultInputIcon}
-            customInputIcon={customInputIcon}
-            customArrowIcon={customArrowIcon}
-            customCloseIcon={customCloseIcon}
-            disabled={disabled}
-            required={required}
-            reopenPickerOnClearDates={reopenPickerOnClearDates}
-            keepOpenOnDateSelect={keepOpenOnDateSelect}
-            isOutsideRange={isOutsideRange}
-            withFullScreenPortal={withFullScreenPortal}
-            onDatesChange={onDatesChange}
-            onFocusChange={this.onDateRangePickerInputFocus}
-            onArrowDown={this.onDayPickerFocus}
-            onQuestionMark={this.showKeyboardShortcutsPanel}
-            onClose={onClose}
-            phrases={phrases}
-            screenReaderMessage={screenReaderInputMessage}
-            isFocused={isDateRangePickerInputFocused}
-          />
+		const onOutsideClick = !withPortal && !withFullScreenPortal ? this.onOutsideClick : undefined;
 
-          { this.maybeRenderDayPickerWithPortal() }
-        </OutsideClickHandler>
-      </div>
-    );
-  }
+		return (
+			<div className="DateRangePicker" onClick={this.centerControl}>
+				<OutsideClickHandler onOutsideClick={onOutsideClick}>
+					<DateRangePickerInputController
+						startDate={startDate}
+						startDateId={startDateId}
+						startDatePlaceholderText={startDatePlaceholderText}
+						isStartDateFocused={focusedInput === START_DATE}
+						endDate={endDate}
+						endDateId={endDateId}
+						endDatePlaceholderText={endDatePlaceholderText}
+						isEndDateFocused={focusedInput === END_DATE}
+						displayFormat={displayFormat}
+						showClearDates={showClearDates}
+						showCaret={!withPortal && !withFullScreenPortal}
+						showDefaultInputIcon={showDefaultInputIcon}
+						customInputIcon={customInputIcon}
+						customArrowIcon={customArrowIcon}
+						customCloseIcon={customCloseIcon}
+						disabled={disabled}
+						required={required}
+						reopenPickerOnClearDates={reopenPickerOnClearDates}
+						keepOpenOnDateSelect={keepOpenOnDateSelect}
+						isOutsideRange={isOutsideRange}
+						withFullScreenPortal={withFullScreenPortal}
+						onDatesChange={onDatesChange}
+						onFocusChange={this.onDateRangePickerInputFocus}
+						onArrowDown={this.onDayPickerFocus}
+						onQuestionMark={this.showKeyboardShortcutsPanel}
+						onClose={onClose}
+						phrases={phrases}
+						screenReaderMessage={screenReaderInputMessage}
+						isFocused={isDateRangePickerInputFocused}
+					/>
+
+					{this.maybeRenderDayPickerWithPortal()}
+				</OutsideClickHandler>
+			</div>
+		);
+	}
 }
 
 DateRangePicker.propTypes = propTypes;
