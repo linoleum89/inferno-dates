@@ -180,9 +180,12 @@ export default class DayPicker extends Component {
 		this.onNextMonthClick = this.onNextMonthClick.bind(this);
 		this.multiplyScrollableMonths = this.multiplyScrollableMonths.bind(this);
 		this.updateStateAfterMonthTransition = this.updateStateAfterMonthTransition.bind(this);
-
+		this.initializeDayPickerWidth = this.initializeDayPickerWidth.bind(this);
 		this.openKeyboardShortcutsPanel = this.openKeyboardShortcutsPanel.bind(this);
+		this.setCalendarMonthGridRef = this.setCalendarMonthGridRef.bind(this);
+		this.setTransitionRef = this.setTransitionRef.bind(this);
 		this.closeKeyboardShortcutsPanel = this.closeKeyboardShortcutsPanel.bind(this);
+		this.adjustDayPickerHeight = this.adjustDayPickerHeight.bind(this);
 	}
 
 	componentDidMount() {
@@ -404,6 +407,14 @@ export default class DayPicker extends Component {
 		return getMonthHeight(this.transitionContainer.querySelectorAll('.CalendarMonth')[i]);
 	}
 
+	setCalendarMonthGridRef(ref) {		
+		this.calendarMonthGrid = ref;
+	}
+
+	setTransitionRef(ref) {		
+		this.transitionContainer = ref;
+	}
+
 	maybeTransitionNextMonth(newFocusedDate) {
 		const { focusedDate } = this.state;
 
@@ -460,13 +471,18 @@ export default class DayPicker extends Component {
 		return this.props.orientation === VERTICAL_ORIENTATION || this.props.orientation === VERTICAL_SCROLLABLE;
 	}
 
-	initializeDayPickerWidth() {
-		this.dayPickerWidth = calculateDimension(
+	initializeDayPickerWidth() {		
+		if (this.calendarMonthGrid) {
 			// eslint-disable-next-line react/no-find-dom-node
-			findDOMNode(this.calendarMonthGrid).querySelector('.CalendarMonth'),
-			'width',
-			true
-		);
+			const calendarMonthGridDOMNode = findDOMNode(this.calendarMonthGrid);
+			if (calendarMonthGridDOMNode) {
+			  this.dayPickerWidth = calculateDimension(
+				calendarMonthGridDOMNode.querySelector('.CalendarMonth'),
+				'width',
+				true,
+			  );
+			}
+		}
 	}
 
 	updateStateAfterMonthTransition() {
@@ -487,14 +503,19 @@ export default class DayPicker extends Component {
 		} else if (focusedDate) {
 			newFocusedDate = this.getFocusedDay(newMonth);
 		}
-
-		// clear the previous transforms
-		applyTransformStyles(
+	
+		if (this.calendarMonthGrid) {
 			// eslint-disable-next-line react/no-find-dom-node
-			findDOMNode(this.calendarMonthGrid).querySelector('.CalendarMonth'),
-			'none'
-		);
-
+			const calendarMonthGridDOMNode = findDOMNode(this.calendarMonthGrid);
+			if (calendarMonthGridDOMNode) {
+			  // clear the previous transforms
+			  applyTransformStyles(
+				calendarMonthGridDOMNode.querySelector('.CalendarMonth'),
+				'none',
+			  );
+			}
+		}
+	  
 		this.setState(
 			{
 				currentMonth: newMonth,
@@ -519,6 +540,7 @@ export default class DayPicker extends Component {
 	adjustDayPickerHeight() {
 		const heights = [];
 
+		if(this.transitionContainer)
 		Array.prototype.forEach.call(this.transitionContainer.querySelectorAll('.CalendarMonth'), el => {
 			if (el.getAttribute('data-visible') === 'true') {
 				heights.push(getMonthHeight(el));
@@ -527,7 +549,7 @@ export default class DayPicker extends Component {
 
 		const newMonthHeight = Math.max(...heights) + MONTH_PADDING;
 
-		if (newMonthHeight !== calculateDimension(this.transitionContainer, 'height')) {
+		if (this.transitionContainer && newMonthHeight !== calculateDimension(this.transitionContainer, 'height')) {
 			this.monthHeight = newMonthHeight;
 			this.transitionContainer.style.height = `${newMonthHeight}px`;
 		}
@@ -730,14 +752,10 @@ export default class DayPicker extends Component {
 
 						<div
 							className={transitionContainerClasses}
-							ref={ref => {
-								this.transitionContainer = ref;
-							}}
+							ref={this.setTransitionRef}
 							style={transitionContainerStyle}>
 							<CalendarMonthGrid
-								ref={ref => {
-									this.calendarMonthGrid = ref;
-								}}
+								ref={this.setCalendarMonthGridRef}
 								transformValue={transformValue}
 								enableOutsideDays={enableOutsideDays}
 								firstVisibleMonthIndex={firstVisibleMonthIndex}
